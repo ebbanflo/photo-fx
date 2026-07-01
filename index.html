@@ -34,6 +34,8 @@
     --c-purple:#8b5cf6;
     --c-cyan:#22c6d6;
     --c-pink:#f45d9e;
+    --c-teal:#14b8a6;
+    --c-azure:#3b82f6;
     --k:var(--c-blue);
   }
   *{box-sizing:border-box;}
@@ -308,6 +310,8 @@
   .group.c-purple{--k:var(--c-purple);}
   .group.c-cyan{--k:var(--c-cyan);}
   .group.c-pink{--k:var(--c-pink);}
+  .group.c-teal{--k:var(--c-teal);}
+  .group.c-azure{--k:var(--c-azure);}
   .group h2{
     flex:0 0 100%;
     display:flex;align-items:center;gap:8px;
@@ -465,7 +469,7 @@
   </div>
 
   <div id="sidebar">
-    <div class="surface-title"><b>control surface</b><span>10 modules</span></div>
+    <div class="surface-title"><b>control surface</b><span>12 modules</span></div>
 
     <div class="presets">
       <select id="presetSelect" title="Load a preset"></select>
@@ -605,6 +609,34 @@
       </div>
     </div>
 
+    <div class="group c-teal">
+      <h2>Glass Sphere · refraction</h2>
+      <div class="row">
+        <label>bulge <span class="val" data-out="sphere_amount">0.00</span></label>
+        <input type="range" data-u="uSphereAmount" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>radius <span class="val" data-out="sphere_radius">0.40</span></label>
+        <input type="range" data-u="uSphereRadius" min="0.1" max="0.8" step="0.01" value="0.4">
+      </div>
+    </div>
+
+    <div class="group c-azure">
+      <h2>3D Ripple · pond</h2>
+      <div class="row">
+        <label>amount <span class="val" data-out="ripple_amount">0.00</span></label>
+        <input type="range" data-u="uRippleAmount" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>rings <span class="val" data-out="ripple_freq">0.30</span></label>
+        <input type="range" data-u="uRippleFreq" min="0" max="1" step="0.01" value="0.3">
+      </div>
+      <div class="row">
+        <label>speed <span class="val" data-out="ripple_speed">1.00</span></label>
+        <input type="range" data-u="uRippleSpeed" min="0" max="2" step="0.01" value="1.0">
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -660,6 +692,11 @@
     "uniform float uTunnelTwist;",
     "uniform float uReliefDepth;",
     "uniform float uReliefSpeed;",
+    "uniform float uSphereAmount;",
+    "uniform float uSphereRadius;",
+    "uniform float uRippleAmount;",
+    "uniform float uRippleFreq;",
+    "uniform float uRippleSpeed;",
 
     "float hash(vec2 p){",
     "  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);",
@@ -676,6 +713,8 @@
     "  vec2 uv = vUv;",
     "  const float PI = 3.14159265;",
     "  float reliefShade = 1.0;",
+    "  float rippleShade = 1.0;",
+    "  float sphereHi = 0.0;",
 
     // --- glitch: screen-space horizontal slice displacement + channel corruption ---
     "  float burst = floor(uTime * 6.0);",
@@ -731,6 +770,39 @@
     "    uv += vec2(cos(la), sin(la)) * (hC - 0.5) * uReliefDepth * 0.09;",
     "  }",
 
+    // --- glass sphere: refract the image through a 3D orb + specular highlight ---
+    "  if (uSphereAmount > 0.001) {",
+    "    vec2 sp = uv - center; sp.x *= aspect;",
+    "    float R = uSphereRadius;",
+    "    float r2 = dot(sp, sp);",
+    "    if (r2 < R * R) {",
+    "      float z = sqrt(max(R * R - r2, 0.0));",
+    "      vec3 n = vec3(sp, z) / R;",
+    "      vec3 I = vec3(0.0, 0.0, -1.0);",
+    "      vec3 refr = refract(I, n, 1.0 / 1.33);",
+    "      vec2 refOff = refr.xy / max(-refr.z, 0.25) * uSphereAmount * 0.35;",
+    "      vec2 nsp = sp + refOff; nsp.x /= aspect;",
+    "      uv = center + nsp;",
+    "      vec3 Lc = normalize(vec3(0.45, 0.6, 0.75));",
+    "      float spec = pow(max(dot(reflect(I, n), Lc), 0.0), 30.0);",
+    "      sphereHi = spec * 0.9 * uSphereAmount;",
+    "    }",
+    "  }",
+
+    // --- 3D ripple: animated concentric water waves, radial lensing + shimmer ---
+    "  if (uRippleAmount > 0.001) {",
+    "    vec2 rp = uv - center; rp.x *= aspect;",
+    "    float rd = length(rp);",
+    "    float k = uRippleFreq * 60.0 + 6.0;",
+    "    float phase = rd * k - uTime * uRippleSpeed * 4.0;",
+    "    float wave = sin(phase);",
+    "    float dwave = cos(phase) * k;",
+    "    vec2 dir = rp / max(rd, 0.001);",
+    "    vec2 off = dir * dwave * uRippleAmount * 0.0006; off.x /= aspect;",
+    "    uv += off;",
+    "    rippleShade = clamp(1.0 + wave * uRippleAmount * 0.5, 0.5, 1.6);",
+    "  }",
+
     // --- chromatic aberration: per-channel radial sample offset ---
     "  vec2 caDir = uv - center; caDir.x *= aspect;",
     "  float caMag = uCaAmount * (0.01 + 0.04 * length(caDir));",
@@ -760,8 +832,10 @@
     "  bloomAccum /= float(TAPS);",
     "  color += bloomAccum * uHalationIntensity * vec3(1.0, 0.55, 0.3) * 3.0;",
 
-    // --- apply 3D relief shading from the heightfield light ---
+    // --- apply 3D shading: relief light, ripple shimmer, glass highlight ---
     "  color *= reliefShade;",
+    "  color *= rippleShade;",
+    "  color += sphereHi;",
 
     // --- color grade: lift / gamma / gain (ASC CDL order) ---
     "  color = clamp(color * uGain + uLift, 0.0, 1.0);",
@@ -818,7 +892,8 @@
    "uHalationRadius","uGrainIntensity","uGrainSize","uLift","uGamma","uGain",
    "uVignetteIntensity","uVignetteRadius","uVignetteSoftness","uWarpAmount","uWarpRadius",
    "uGlitchIntensity","uScanlineIntensity","uKaleidoSegments","uKaleidoSpin","uTunnelAmount",
-   "uTunnelSpeed","uTunnelTwist","uReliefDepth","uReliefSpeed"].forEach(function(name){
+   "uTunnelSpeed","uTunnelTwist","uReliefDepth","uReliefSpeed","uSphereAmount","uSphereRadius",
+   "uRippleAmount","uRippleFreq","uRippleSpeed"].forEach(function(name){
     uniformLoc[name] = gl.getUniformLocation(program, name);
   });
 
@@ -1026,7 +1101,9 @@
     "Kaleido Trip":{ uKaleidoSegments:8, uKaleidoSpin:0.5, uCaAmount:0.4, uHalationIntensity:0.6, uGrainIntensity:0.15 },
     "Vortex":      { uTunnelAmount:0.85, uTunnelSpeed:0.6, uTunnelTwist:0.45, uCaAmount:0.5, uHalationIntensity:0.5, uVignetteIntensity:0.4 },
     "Sculpture 3D":{ uReliefDepth:0.7, uReliefSpeed:0.5, uGamma:0.92, uVignetteIntensity:0.5, uGrainIntensity:0.18, uCaAmount:0.2 },
-    "Corrupted":   { uGlitchIntensity:0.6, uScanlineIntensity:0.5, uCaAmount:0.7, uGrainIntensity:0.3, uHalationIntensity:0.4 }
+    "Corrupted":   { uGlitchIntensity:0.6, uScanlineIntensity:0.5, uCaAmount:0.7, uGrainIntensity:0.3, uHalationIntensity:0.4 },
+    "Fishbowl":    { uSphereAmount:0.7, uSphereRadius:0.5, uCaAmount:0.35, uHalationIntensity:0.4, uVignetteIntensity:0.5, uGrainIntensity:0.12 },
+    "Ripple Pool": { uRippleAmount:0.6, uRippleFreq:0.35, uRippleSpeed:1.0, uCaAmount:0.3, uHalationIntensity:0.5, uGrainIntensity:0.12 }
   };
 
   var PRESET_KEY = "photofx_presets_v1";
@@ -1261,6 +1338,11 @@
     gl.uniform1f(uniformLoc.uTunnelTwist, state.uTunnelTwist);
     gl.uniform1f(uniformLoc.uReliefDepth, state.uReliefDepth);
     gl.uniform1f(uniformLoc.uReliefSpeed, state.uReliefSpeed);
+    gl.uniform1f(uniformLoc.uSphereAmount, state.uSphereAmount);
+    gl.uniform1f(uniformLoc.uSphereRadius, state.uSphereRadius);
+    gl.uniform1f(uniformLoc.uRippleAmount, state.uRippleAmount);
+    gl.uniform1f(uniformLoc.uRippleFreq, state.uRippleFreq);
+    gl.uniform1f(uniformLoc.uRippleSpeed, state.uRippleSpeed);
     gl.uniform1i(uniformLoc.uTexture, 0);
 
     gl.activeTexture(gl.TEXTURE0);

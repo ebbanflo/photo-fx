@@ -41,7 +41,7 @@ placeholder sunset image loads by default so you can see the effects immediately
 A preset selector sits at the top of the control surface.
 
 - Choose a **built-in** preset (Cinematic, Dreamwave, Kaleido Trip, Vortex,
-  Sculpture 3D, Corrupted) to jump to a curated look.
+  Sculpture 3D, Corrupted, Fishbowl, Ripple Pool) to jump to a curated look.
 - **Save** captures the current knob positions as a named preset, stored in
   `localStorage` so it persists across sessions.
 - **Del** removes one of your saved presets (built-ins can't be deleted).
@@ -57,8 +57,8 @@ are all captured in motion. The clip downloads as `photo-fx-clip.webm`.
 
 All effects are implemented as a single WebGL fragment shader that samples the
 source image and applies each effect in sequence: warp, kaleidoscope, tunnel,
-3D relief, chromatic aberration, halation, color grade, vignette, grain, and
-glitch/scanlines. A `requestAnimationFrame` loop redraws every frame so
+3D relief, glass sphere, 3D ripple, chromatic aberration, halation, color grade,
+vignette, grain, and glitch/scanlines. A `requestAnimationFrame` loop redraws so
 time-based effects animate continuously. Images are downscaled client-side to a
 2048px max dimension before being uploaded as a texture, keeping the shader fast
 on large photos. Textures are uploaded with `UNPACK_FLIP_Y_WEBGL` so images
@@ -125,6 +125,21 @@ light source that orbits over time, and adds height-based parallax so the photo
 looks sculpted and shifts in 3D.
 - *Depth* — relief strength (normal steepness + parallax).
 - *Orbit* — rotation speed of the light around the surface.
+
+**Glass Sphere (Refraction)** — Maps the image onto a 3D glass orb: it builds a
+hemisphere normal per pixel, refracts the view ray through it (`refract()` at an
+IOR of ~1.33), and adds a specular highlight, so the image bulges and magnifies
+like it's seen through a lens or crystal ball.
+- *Bulge* — refraction strength.
+- *Radius* — size of the orb on screen.
+
+**3D Ripple (Pond)** — Animated concentric waves radiating from center, treated
+as a 3D water surface: the wave slope displaces the sampling coordinates
+(radial lensing) while crests and troughs are shaded for a shimmering surface
+that moves over time.
+- *Amount* — wave height / distortion strength.
+- *Rings* — spatial frequency of the waves.
+- *Speed* — how fast the ripples travel outward.
 
 ## Tech notes
 
