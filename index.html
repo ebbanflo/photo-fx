@@ -366,14 +366,17 @@
   #fileInput{display:none;}
 
   @media (max-width: 900px){
-    #app{flex-direction:column;margin:8px;border-radius:16px;}
-    #main{padding:calc(8px + env(safe-area-inset-top)) 8px 8px;}
+    /* let the page flow & scroll naturally instead of clamping to one screen */
+    html,body{height:auto;}
+    #app{flex-direction:column;margin:8px;border-radius:16px;height:auto;}
+    #main{flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 8px 8px;}
     header{padding:2px 6px 12px;}
-    #canvasWrap{padding:4px;}
+    #canvasWrap{flex:0 0 auto;padding:4px;}
     canvas#gl{max-height:46vh;}
     #sidebar{
       width:100%;border-left:none;border-top:1px solid var(--line-2);
       box-shadow:0 1px 0 rgba(255,255,255,0.7) inset;
+      overflow-y:visible;
     }
     .group{justify-content:center;}
   }
@@ -692,6 +695,9 @@
     gl.viewport(0, 0, tw, th);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
+    // Flip on upload: with this fullscreen-quad shader, texture row 0 maps to
+    // the bottom of the screen, which would render every image upside-down.
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, off);
   }
 
@@ -861,8 +867,7 @@
   var fileInput = document.getElementById("fileInput");
   document.getElementById("loadBtn").addEventListener("click", function(){ fileInput.click(); });
 
-  function handleFile(file){
-    if (!file || file.type.indexOf("image/") !== 0) return;
+  function loadViaImg(file){
     var reader = new FileReader();
     reader.onload = function(e){
       var image = new Image();
@@ -870,6 +875,19 @@
       image.src = e.target.result;
     };
     reader.readAsDataURL(file);
+  }
+
+  function handleFile(file){
+    if (!file || file.type.indexOf("image/") !== 0) return;
+    // Decode via createImageBitmap so EXIF orientation is baked into the
+    // pixels — otherwise phone photos can come in rotated/upside-down.
+    if (window.createImageBitmap) {
+      createImageBitmap(file, { imageOrientation: "from-image" })
+        .then(function(bmp){ loadImageSource(bmp); })
+        .catch(function(){ loadViaImg(file); });
+    } else {
+      loadViaImg(file);
+    }
   }
 
   fileInput.addEventListener("change", function(e){
