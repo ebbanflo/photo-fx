@@ -31,6 +31,9 @@
     --c-orange:#ff6a1a;
     --c-red:#e4482e;
     --c-graphite:#40434a;
+    --c-purple:#8b5cf6;
+    --c-cyan:#22c6d6;
+    --c-pink:#f45d9e;
     --k:var(--c-blue);
   }
   *{box-sizing:border-box;}
@@ -259,6 +262,9 @@
   .group.c-orange{--k:var(--c-orange);}
   .group.c-red{--k:var(--c-red);}
   .group.c-graphite{--k:var(--c-graphite);}
+  .group.c-purple{--k:var(--c-purple);}
+  .group.c-cyan{--k:var(--c-cyan);}
+  .group.c-pink{--k:var(--c-pink);}
   .group h2{
     flex:0 0 100%;
     display:flex;align-items:center;gap:8px;
@@ -414,7 +420,7 @@
   </div>
 
   <div id="sidebar">
-    <div class="surface-title"><b>control surface</b><span>7 modules</span></div>
+    <div class="surface-title"><b>control surface</b><span>10 modules</span></div>
 
     <div class="group c-blue">
       <h2>Chromatic Aberration</h2>
@@ -508,6 +514,46 @@
       </div>
     </div>
 
+    <div class="group c-purple">
+      <h2>Kaleidoscope</h2>
+      <div class="row">
+        <label>segments <span class="val" data-out="kaleido_segments">0.00</span></label>
+        <input type="range" data-u="uKaleidoSegments" min="0" max="16" step="1" value="0">
+      </div>
+      <div class="row">
+        <label>spin <span class="val" data-out="kaleido_spin">0.00</span></label>
+        <input type="range" data-u="uKaleidoSpin" min="0" max="2" step="0.01" value="0">
+      </div>
+    </div>
+
+    <div class="group c-cyan">
+      <h2>Warp Tunnel · droste</h2>
+      <div class="row">
+        <label>amount <span class="val" data-out="tunnel_amount">0.00</span></label>
+        <input type="range" data-u="uTunnelAmount" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>speed <span class="val" data-out="tunnel_speed">0.50</span></label>
+        <input type="range" data-u="uTunnelSpeed" min="0" max="2" step="0.01" value="0.5">
+      </div>
+      <div class="row">
+        <label>twist <span class="val" data-out="tunnel_twist">0.00</span></label>
+        <input type="range" data-u="uTunnelTwist" min="-1" max="1" step="0.01" value="0">
+      </div>
+    </div>
+
+    <div class="group c-pink">
+      <h2>3D Relief · heightfield</h2>
+      <div class="row">
+        <label>depth <span class="val" data-out="relief_depth">0.00</span></label>
+        <input type="range" data-u="uReliefDepth" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>orbit <span class="val" data-out="relief_speed">0.60</span></label>
+        <input type="range" data-u="uReliefSpeed" min="0" max="2" step="0.01" value="0.6">
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -556,15 +602,29 @@
     "uniform float uWarpRadius;",
     "uniform float uGlitchIntensity;",
     "uniform float uScanlineIntensity;",
+    "uniform float uKaleidoSegments;",
+    "uniform float uKaleidoSpin;",
+    "uniform float uTunnelAmount;",
+    "uniform float uTunnelSpeed;",
+    "uniform float uTunnelTwist;",
+    "uniform float uReliefDepth;",
+    "uniform float uReliefSpeed;",
 
     "float hash(vec2 p){",
     "  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);",
+    "}",
+
+    "float lumAt(vec2 p){",
+    "  vec3 c = texture2D(uTexture, clamp(p, 0.0, 1.0)).rgb;",
+    "  return dot(c, vec3(0.299, 0.587, 0.114));",
     "}",
 
     "void main(){",
     "  vec2 center = vec2(0.5);",
     "  float aspect = uResolution.x / uResolution.y;",
     "  vec2 uv = vUv;",
+    "  const float PI = 3.14159265;",
+    "  float reliefShade = 1.0;",
 
     // --- glitch: screen-space horizontal slice displacement + channel corruption ---
     "  float burst = floor(uTime * 6.0);",
@@ -582,6 +642,43 @@
     "  vec2 rd = vec2(d.x * cN - d.y * sN, d.x * sN + d.y * cN);",
     "  rd.x /= aspect;",
     "  uv = center + rd;",
+
+    // --- kaleidoscope: fold uv into mirrored angular wedges, spinning ---
+    "  if (uKaleidoSegments >= 2.0) {",
+    "    vec2 kp = uv - center; kp.x *= aspect;",
+    "    float kr = length(kp);",
+    "    float ka = atan(kp.y, kp.x) + uTime * uKaleidoSpin * 1.5;",
+    "    float kseg = 2.0 * PI / uKaleidoSegments;",
+    "    ka = mod(ka, kseg);",
+    "    ka = abs(ka - kseg * 0.5);",
+    "    vec2 kq = vec2(cos(ka), sin(ka)) * kr;",
+    "    kq.x /= aspect;",
+    "    uv = center + kq;",
+    "  }",
+
+    // --- droste warp tunnel: log-polar infinite zoom with spiral twist ---
+    "  if (uTunnelAmount > 0.001) {",
+    "    vec2 tp = uv - center; tp.x *= aspect;",
+    "    float tr = max(length(tp), 0.001);",
+    "    float ta = atan(tp.y, tp.x);",
+    "    float depth = 0.16 / tr + uTime * uTunnelSpeed * 0.5;",
+    "    float around = ta / (2.0 * PI) + uTunnelTwist * depth;",
+    "    vec2 tuv = fract(vec2(around, depth));",
+    "    uv = mix(uv, tuv, uTunnelAmount);",
+    "  }",
+
+    // --- 3D relief: treat luminance as a heightfield, orbiting light + parallax ---
+    "  if (uReliefDepth > 0.001) {",
+    "    float e = 1.6 / uResolution.x;",
+    "    float hC = lumAt(uv);",
+    "    float hX = lumAt(uv + vec2(e, 0.0));",
+    "    float hY = lumAt(uv + vec2(0.0, e));",
+    "    float la = uTime * uReliefSpeed * 0.7;",
+    "    vec3 nrm = normalize(vec3((hC - hX) * uReliefDepth * 9.0, (hC - hY) * uReliefDepth * 9.0, 1.0));",
+    "    vec3 L = normalize(vec3(cos(la), sin(la), 0.85));",
+    "    reliefShade = clamp(dot(nrm, L) * 0.6 + 0.62, 0.0, 1.6);",
+    "    uv += vec2(cos(la), sin(la)) * (hC - 0.5) * uReliefDepth * 0.09;",
+    "  }",
 
     // --- chromatic aberration: per-channel radial sample offset ---
     "  vec2 caDir = uv - center; caDir.x *= aspect;",
@@ -611,6 +708,9 @@
     "  }",
     "  bloomAccum /= float(TAPS);",
     "  color += bloomAccum * uHalationIntensity * vec3(1.0, 0.55, 0.3) * 3.0;",
+
+    // --- apply 3D relief shading from the heightfield light ---
+    "  color *= reliefShade;",
 
     // --- color grade: lift / gamma / gain (ASC CDL order) ---
     "  color = clamp(color * uGain + uLift, 0.0, 1.0);",
@@ -666,7 +766,8 @@
   ["uTexture","uResolution","uTime","uCaAmount","uHalationThreshold","uHalationIntensity",
    "uHalationRadius","uGrainIntensity","uGrainSize","uLift","uGamma","uGain",
    "uVignetteIntensity","uVignetteRadius","uVignetteSoftness","uWarpAmount","uWarpRadius",
-   "uGlitchIntensity","uScanlineIntensity"].forEach(function(name){
+   "uGlitchIntensity","uScanlineIntensity","uKaleidoSegments","uKaleidoSpin","uTunnelAmount",
+   "uTunnelSpeed","uTunnelTwist","uReliefDepth","uReliefSpeed"].forEach(function(name){
     uniformLoc[name] = gl.getUniformLocation(program, name);
   });
 
@@ -950,6 +1051,13 @@
     gl.uniform1f(uniformLoc.uWarpRadius, state.uWarpRadius);
     gl.uniform1f(uniformLoc.uGlitchIntensity, state.uGlitchIntensity);
     gl.uniform1f(uniformLoc.uScanlineIntensity, state.uScanlineIntensity);
+    gl.uniform1f(uniformLoc.uKaleidoSegments, state.uKaleidoSegments);
+    gl.uniform1f(uniformLoc.uKaleidoSpin, state.uKaleidoSpin);
+    gl.uniform1f(uniformLoc.uTunnelAmount, state.uTunnelAmount);
+    gl.uniform1f(uniformLoc.uTunnelSpeed, state.uTunnelSpeed);
+    gl.uniform1f(uniformLoc.uTunnelTwist, state.uTunnelTwist);
+    gl.uniform1f(uniformLoc.uReliefDepth, state.uReliefDepth);
+    gl.uniform1f(uniformLoc.uReliefSpeed, state.uReliefSpeed);
     gl.uniform1i(uniformLoc.uTexture, 0);
 
     gl.activeTexture(gl.TEXTURE0);
