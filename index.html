@@ -1111,13 +1111,50 @@
 
   var defaults = sliders.map(function(s){ return s.value; });
 
+  // Randomize: freely vary the subtle "look" params, but only engage a small
+  // random subset of the heavy structural effects — otherwise a dominant effect
+  // like the kaleidoscope (which turns on across most of its slider range) shows
+  // up on almost every roll and drowns everything else out.
+  var RND_LOOK = ["uCaAmount","uHalationThreshold","uHalationIntensity","uHalationRadius",
+    "uGrainIntensity","uGrainSize","uLift","uGamma","uGain",
+    "uVignetteIntensity","uVignetteRadius","uVignetteSoftness"];
+  var RND_STRUCTURAL = [
+    { on:"uWarpAmount",      extra:["uWarpRadius"] },
+    { on:"uGlitchIntensity", extra:["uScanlineIntensity"] },
+    { on:"uKaleidoSegments", extra:["uKaleidoSpin"] },
+    { on:"uTunnelAmount",    extra:["uTunnelSpeed","uTunnelTwist"] },
+    { on:"uReliefDepth",     extra:["uReliefSpeed"] },
+    { on:"uSphereAmount",    extra:["uSphereRadius"] },
+    { on:"uRippleAmount",    extra:["uRippleFreq","uRippleSpeed"] }
+  ];
+  function rndSnap(v, step){ return Math.round(v / step) * step; }
+  function rndFull(s){
+    var min = parseFloat(s.min), max = parseFloat(s.max), step = parseFloat(s.step) || 0.01;
+    return rndSnap(min + Math.random() * (max - min), step);
+  }
+  function rndActive(s){
+    var u = s.getAttribute("data-u");
+    var min = parseFloat(s.min), max = parseFloat(s.max), step = parseFloat(s.step) || 0.01;
+    if (u === "uKaleidoSegments") return Math.floor(3 + Math.random() * 10);            // 3..12 wedges
+    if (u === "uWarpAmount") { var sign = Math.random() < 0.5 ? -1 : 1; return rndSnap(sign * (0.3 + Math.random() * 0.7), step); }
+    var lo = min + 0.4 * (max - min);                                                   // clearly-on part of the range
+    return rndSnap(lo + Math.random() * (max - lo), step);
+  }
   document.getElementById("randomizeBtn").addEventListener("click", function(){
-    sliders.forEach(function(slider){
-      var min = parseFloat(slider.min), max = parseFloat(slider.max);
-      var val = min + Math.random() * (max - min);
-      slider.value = val;
-      syncSlider(slider);
-    });
+    // start from defaults so unchosen structural effects stay off
+    sliders.forEach(function(s, i){ s.value = defaults[i]; });
+    // vary the always-safe look params
+    RND_LOOK.forEach(function(u){ if (sliderByU[u]) sliderByU[u].value = rndFull(sliderByU[u]); });
+    // engage 0-2 structural effects, chosen at random
+    var pool = RND_STRUCTURAL.slice();
+    for (var i = pool.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    var count = Math.floor(Math.random() * 3);
+    for (var k = 0; k < count; k++){
+      var eff = pool[k];
+      if (sliderByU[eff.on]) sliderByU[eff.on].value = rndActive(sliderByU[eff.on]);
+      eff.extra.forEach(function(u){ if (sliderByU[u]) sliderByU[u].value = rndFull(sliderByU[u]); });
+    }
+    sliders.forEach(syncSlider);
   });
 
   document.getElementById("resetBtn").addEventListener("click", function(){
