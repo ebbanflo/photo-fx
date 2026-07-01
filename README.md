@@ -20,6 +20,11 @@ a dark inset "screen" bezel around the canvas, and every parameter is a colored
 Under the hood each knob drives a hidden `<input type=range>`, so it stays fully
 keyboard/programmatic-friendly while looking like a physical control.
 
+On narrow / mobile screens the control surface collapses to **one module at a
+time**: a "module" dropdown picks which effect is shown, so the screen stays in
+view while you adjust a single effect instead of scrolling past all of them. On
+wider screens the full stack of modules is shown beside the canvas as usual.
+
 ## Usage
 
 Open `index.html` in any WebGL-capable browser (or visit the live URL above). A
