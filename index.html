@@ -7,16 +7,16 @@
 <title>photo-fx — GPU Photo Effects</title>
 <style>
   :root{
-    /* chassis / surface */
-    --desk:#b9b7ac;
-    --chassis-hi:#f2f1ec;
-    --chassis-lo:#d7d5cc;
-    --panel:#e9e7e0;
-    --panel-2:#f4f3ee;
-    --line:#c8c6bb;
-    --line-2:#b7b5a9;
-    --ink:#1c1d1f;
-    --muted:#86847b;
+    /* chassis / surface — OP-1 flat aluminum + Mutable cream FR4 */
+    --desk:#b6b3a7;
+    --chassis-hi:#f5f3ed;
+    --chassis-lo:#e0ddd2;
+    --panel:#f7f5ef;
+    --panel-2:#efede4;
+    --line:#dcd8ca;
+    --line-2:#c2bfb1;
+    --ink:#26262a;
+    --muted:#8c897d;
     /* screen (OLED) */
     --screen:#0c0f0b;
     --screen-2:#141812;
@@ -25,7 +25,7 @@
     /* TE orange */
     --te:#ff5b13;
     --te-lo:#e14708;
-    /* encoder colors */
+    /* encoder colors — OP-1 discs / MI anodized */
     --c-blue:#2f7ff2;
     --c-green:#3fae5a;
     --c-orange:#ff6a1a;
@@ -36,13 +36,16 @@
     --c-pink:#f45d9e;
     --c-teal:#14b8a6;
     --c-azure:#3b82f6;
+    --c-mint:#2ec98e;
+    --c-amber:#f0a021;
+    --c-indigo:#5c6ac4;
     --k:var(--c-blue);
   }
   *{box-sizing:border-box;}
   html,body{
     margin:0;padding:0;height:100%;
     background:
-      radial-gradient(120% 90% at 50% -10%, #cfcdc3 0%, var(--desk) 60%, #a8a69b 100%);
+      radial-gradient(120% 90% at 50% -10%, #cfcdc3 0%, var(--desk) 60%, #a5a297 100%);
     color:var(--ink);
     font-family:"SFMono-Regular","SF Mono","JetBrains Mono","Roboto Mono",ui-monospace,Menlo,Consolas,monospace;
     -webkit-font-smoothing:antialiased;
@@ -53,12 +56,12 @@
     height:100%;
     margin:14px;
     border-radius:20px;
-    background:linear-gradient(160deg,var(--chassis-hi),var(--chassis-lo));
+    background:linear-gradient(165deg,var(--chassis-hi),var(--chassis-lo));
     box-shadow:
-      0 1px 0 rgba(255,255,255,0.9) inset,
-      0 -2px 0 rgba(0,0,0,0.06) inset,
-      0 18px 50px rgba(0,0,0,0.35),
-      0 2px 6px rgba(0,0,0,0.2);
+      0 1px 0 rgba(255,255,255,0.92) inset,
+      0 -2px 0 rgba(0,0,0,0.05) inset,
+      0 18px 50px rgba(0,0,0,0.32),
+      0 2px 6px rgba(0,0,0,0.18);
     position:relative;
     overflow:hidden;
   }
@@ -93,6 +96,12 @@
     background:conic-gradient(var(--c-orange) 0 90deg,var(--c-blue) 90deg 180deg,var(--c-green) 180deg 270deg,var(--c-graphite) 270deg 360deg);
     box-shadow:0 1px 2px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.08) inset;
     position:relative;
+    animation:markSpin 14s linear infinite;
+  }
+  @keyframes markSpin{
+    0%,72%{transform:rotate(0deg);}
+    78%,97%{transform:rotate(90deg);}
+    100%{transform:rotate(90deg);}
   }
   .mark::after{
     content:"";position:absolute;inset:11px;border-radius:50%;
@@ -104,52 +113,70 @@
   }
   header h1 span{color:var(--te);}
   .model{
-    font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);
+    font-size:9.5px;letter-spacing:0.14em;text-transform:lowercase;color:var(--muted);
     margin-top:4px;
   }
+  /* OP-1 style LED level meter */
+  .meter{
+    display:flex;gap:4px;align-items:flex-end;
+    padding:0 4px;
+  }
+  .meter i{
+    width:5px;height:16px;border-radius:2px;
+    background:#d9d6c9;
+    box-shadow:inset 0 1px 1px rgba(0,0,0,0.14);
+    transition:background 0.1s ease, box-shadow 0.1s ease;
+  }
+  .meter i.on{background:var(--c-green);box-shadow:0 0 6px rgba(63,174,90,0.55);}
+  .meter i:nth-child(6).on,
+  .meter i:nth-child(7).on{background:var(--c-amber);box-shadow:0 0 6px rgba(240,160,33,0.55);}
+  .meter i:nth-child(8).on{background:var(--c-red);box-shadow:0 0 7px rgba(228,72,46,0.6);}
+
   .toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;}
 
   button, .btn{
     font-family:inherit;
-    background:linear-gradient(#fdfcf8,#e7e5dc);
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(#fdfcf8,#eceade);
     color:var(--ink);
     border:1px solid var(--line-2);
     padding:0 15px;
     height:40px;
-    border-radius:9px;
+    border-radius:11px;
     font-size:11px;
     font-weight:700;
     letter-spacing:0.06em;
     text-transform:uppercase;
     cursor:pointer;
     touch-action:manipulation;
-    box-shadow:0 2px 0 var(--line-2), 0 3px 6px rgba(0,0,0,0.14), 0 1px 0 rgba(255,255,255,0.9) inset;
-    transition:transform 0.06s ease, box-shadow 0.06s ease, filter 0.12s ease;
+    box-shadow:0 2px 0 var(--line-2), 0 3px 6px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.9) inset;
+    transition:transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
   }
-  button:hover, .btn:hover{filter:brightness(1.02);}
+  button::before{
+    content:"";width:7px;height:7px;border-radius:50%;flex-shrink:0;
+    background:var(--dot,#b9b6aa);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.1), 0 0 5px var(--dot,transparent);
+  }
+  button:hover, .btn:hover{filter:brightness(1.03);transform:translateY(-1px);box-shadow:0 3px 0 var(--line-2), 0 5px 10px rgba(0,0,0,0.14), 0 1px 0 rgba(255,255,255,0.9) inset;}
   button:active, .btn:active{
     transform:translateY(2px);
     box-shadow:0 0 0 var(--line-2), 0 1px 2px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.7) inset;
   }
+  #loadBtn{--dot:var(--c-green);}
+  #randomizeBtn{--dot:var(--c-blue);}
+  #resetBtn{--dot:var(--c-graphite);}
+  #recBtn{--dot:var(--c-red);}
   button.primary{
+    --dot:rgba(255,255,255,0.9);
     background:linear-gradient(#ff8046,var(--te));
     color:#fff;border-color:var(--te-lo);
     box-shadow:0 2px 0 var(--te-lo), 0 3px 8px rgba(255,91,19,0.35), 0 1px 0 rgba(255,255,255,0.35) inset;
     text-shadow:0 1px 0 rgba(0,0,0,0.2);
   }
+  button.primary:hover{box-shadow:0 3px 0 var(--te-lo), 0 5px 12px rgba(255,91,19,0.4), 0 1px 0 rgba(255,255,255,0.35) inset;}
   button.primary:active{
     transform:translateY(2px);
     box-shadow:0 0 0 var(--te-lo), 0 1px 3px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.3) inset;
-  }
-  button.accent2{
-    background:linear-gradient(#4a8bf5,var(--c-blue));
-    color:#fff;border-color:#1c5fc4;
-    box-shadow:0 2px 0 #1c5fc4, 0 3px 8px rgba(47,127,242,0.32), 0 1px 0 rgba(255,255,255,0.35) inset;
-    text-shadow:0 1px 0 rgba(0,0,0,0.2);
-  }
-  button.accent2:active{
-    transform:translateY(2px);
-    box-shadow:0 0 0 #1c5fc4, 0 1px 3px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.3) inset;
   }
 
   #canvasWrap{
@@ -184,6 +211,12 @@
     background:radial-gradient(circle at 35% 30%,#6a6c66,#2c2e29);
     box-shadow:24px 0 0 -0.5px #2c2e29, 0 0 0 1px rgba(0,0,0,0.4);
   }
+  .bezel::after{
+    /* glass sheen over the display */
+    content:"";position:absolute;left:16px;right:16px;top:16px;bottom:30px;
+    border-radius:5px;pointer-events:none;z-index:2;
+    background:linear-gradient(115deg,rgba(255,255,255,0.07) 0%,rgba(255,255,255,0.02) 32%,transparent 52%);
+  }
   canvas#gl{
     display:block;
     max-width:100%;
@@ -208,6 +241,53 @@
   }
   @keyframes blink{0%,60%{opacity:1;}61%,100%{opacity:0.3;}}
 
+  /* parameter HUD — pops up on the display when an encoder turns */
+  .hud{
+    position:absolute;left:28px;top:26px;z-index:3;
+    pointer-events:none;
+    color:var(--screen-ink);
+    font-size:10px;letter-spacing:0.14em;text-transform:lowercase;
+    text-shadow:0 0 8px rgba(157,255,91,0.45);
+    opacity:0;transform:translateY(6px);
+    transition:opacity 0.18s ease, transform 0.18s ease;
+  }
+  .hud.show{opacity:1;transform:none;}
+  .hud .hud-value{
+    font-size:27px;font-weight:800;letter-spacing:0.02em;
+    margin:3px 0 7px;
+    font-variant-numeric:tabular-nums;
+  }
+  .hud .hud-bar{
+    width:150px;height:4px;border-radius:2px;overflow:hidden;
+    background:rgba(157,255,91,0.16);
+    box-shadow:0 0 0 1px rgba(157,255,91,0.12);
+  }
+  .hud .hud-bar i{
+    display:block;height:100%;width:0;
+    background:var(--screen-ink);
+    box-shadow:0 0 8px rgba(157,255,91,0.6);
+    transition:width 0.08s linear;
+  }
+
+  /* boot sequence overlay */
+  .boot{
+    position:absolute;left:16px;right:16px;top:16px;bottom:30px;
+    border-radius:5px;z-index:4;
+    background:var(--screen);
+    display:flex;align-items:center;justify-content:center;gap:2px;
+    color:var(--screen-ink);
+    font-size:11px;letter-spacing:0.18em;text-transform:lowercase;
+    text-shadow:0 0 8px rgba(157,255,91,0.5);
+    transition:opacity 0.55s ease;
+  }
+  .boot.off{opacity:0;}
+  .boot .bcur{
+    width:7px;height:13px;margin-left:4px;
+    background:var(--screen-ink);
+    box-shadow:0 0 8px rgba(157,255,91,0.6);
+    animation:blink 0.9s steps(1) infinite;
+  }
+
   #canvasWrap.dragging .bezel{outline:2px dashed var(--te);outline-offset:6px;}
   #canvasWrap.dragging::after{
     content:"drop image";
@@ -228,7 +308,7 @@
     padding:8px 12px 0 6px;
     font-size:9.5px;
     letter-spacing:0.06em;
-    text-transform:uppercase;
+    text-transform:lowercase;
     color:var(--muted);
     line-height:1.6;
   }
@@ -237,18 +317,26 @@
   #sidebar{
     width:372px;
     flex-shrink:0;
-    background:linear-gradient(180deg,#e4e2da,#d9d7ce);
+    background:linear-gradient(180deg,#eeece3,#e2dfd4);
     border-left:1px solid var(--line-2);
     box-shadow:1px 0 0 rgba(255,255,255,0.7) inset;
     overflow-y:auto;
     padding:18px 16px calc(18px + env(safe-area-inset-bottom));
   }
+  #sidebar::-webkit-scrollbar{width:8px;}
+  #sidebar::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px;}
+  #sidebar::-webkit-scrollbar-track{background:transparent;}
   .surface-title{
     display:flex;align-items:center;justify-content:space-between;
-    font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);
+    font-size:10px;letter-spacing:0.18em;text-transform:lowercase;color:var(--muted);
     margin:0 4px 14px;
   }
   .surface-title b{color:var(--ink);font-weight:800;letter-spacing:0.14em;}
+  /* mutable-style alignment cross */
+  .surface-title::after{
+    content:"+";color:var(--line-2);font-size:11px;font-weight:400;
+    margin-left:8px;
+  }
 
   /* ---- preset bar ---- */
   .presets{
@@ -276,6 +364,7 @@
     height:38px;padding:0 12px;font-size:10px;
     display:inline-flex;align-items:center;
   }
+  .mini::before{display:none;}
 
   /* ---- module selector (mobile: adjust one effect while the screen stays visible) ---- */
   .module-bar{
@@ -284,7 +373,7 @@
     margin:0 2px 14px;
   }
   .module-bar .module-lbl{
-    font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);
+    font-size:9px;letter-spacing:0.14em;text-transform:lowercase;color:var(--muted);
     font-weight:700;white-space:nowrap;
   }
   .module-bar select{
@@ -321,14 +410,26 @@
     box-shadow:0 0 8px #ff3b3b;animation:blink 1s steps(1) infinite;
   }
 
+  /* ---- effect modules — mutable instruments cream cards ---- */
   .group{
+    position:relative;
     display:flex;flex-wrap:wrap;gap:16px 10px;
     border:1px solid var(--line);
-    border-radius:12px;
+    border-radius:14px;
     padding:12px 12px 16px;
     margin-bottom:12px;
-    background:linear-gradient(180deg,var(--panel-2),var(--panel));
-    box-shadow:0 1px 0 rgba(255,255,255,0.8) inset, 0 1px 2px rgba(0,0,0,0.05);
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    box-shadow:0 1px 0 rgba(255,255,255,0.85) inset, 0 2px 5px rgba(0,0,0,0.05);
+    transition:box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .group:hover{
+    box-shadow:0 1px 0 rgba(255,255,255,0.85) inset, 0 5px 14px rgba(0,0,0,0.09);
+    transform:translateY(-1px);
+  }
+  /* MI alignment cross in the corner */
+  .group::after{
+    content:"+";position:absolute;right:9px;bottom:5px;
+    color:var(--line-2);font-size:10px;pointer-events:none;
   }
   .group.c-blue{--k:var(--c-blue);}
   .group.c-green{--k:var(--c-green);}
@@ -340,19 +441,44 @@
   .group.c-pink{--k:var(--c-pink);}
   .group.c-teal{--k:var(--c-teal);}
   .group.c-azure{--k:var(--c-azure);}
+  .group.c-mint{--k:var(--c-mint);}
+  .group.c-amber{--k:var(--c-amber);}
+  .group.c-indigo{--k:var(--c-indigo);}
   .group h2{
     flex:0 0 100%;
     display:flex;align-items:center;gap:8px;
-    font-size:10px;
-    text-transform:uppercase;
-    letter-spacing:0.14em;
+    font-size:10.5px;
+    text-transform:lowercase;
+    letter-spacing:0.16em;
     margin:0 0 2px 0;
     color:var(--ink);
     font-weight:800;
   }
-  .group h2::before{
-    content:"";width:9px;height:9px;border-radius:2px;background:var(--k);
-    box-shadow:0 0 0 1px rgba(0,0,0,0.12);
+  /* MI hairline rule running out from the module name */
+  .group h2::after{
+    content:"";flex:1;height:1px;
+    background:linear-gradient(90deg,var(--line-2),transparent);
+  }
+  /* module activity LED */
+  .group h2 .led{
+    width:8px;height:8px;border-radius:50%;flex-shrink:0;
+    background:#d5d2c4;
+    box-shadow:inset 0 1px 1px rgba(0,0,0,0.25);
+    transition:background 0.25s ease, box-shadow 0.25s ease;
+  }
+  .group.lit h2 .led{
+    background:var(--k);
+    box-shadow:0 0 8px var(--k), inset 0 0 2px rgba(255,255,255,0.5);
+    animation:ledBreathe 2.4s ease-in-out infinite;
+  }
+  @keyframes ledBreathe{0%,100%{filter:brightness(1);}50%{filter:brightness(1.45);}}
+  /* modules slide in on boot (desktop) */
+  @media (min-width:901px){
+    .group{animation:moduleIn 0.55s cubic-bezier(0.2,0.7,0.25,1) backwards;}
+  }
+  @keyframes moduleIn{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:none;}
   }
 
   .row{
@@ -364,7 +490,7 @@
     margin:0;
   }
 
-  /* rotary encoder knob */
+  /* rotary encoder knob — OP-1 solid color disc */
   .knob{
     --p:0deg;
     position:relative;
@@ -378,50 +504,41 @@
   /* progress gauge ring */
   .knob::before{
     content:"";position:absolute;inset:-4px;border-radius:50%;
-    background:conic-gradient(from 225deg, var(--k) var(--p), rgba(0,0,0,0.10) 0);
+    background:conic-gradient(from 225deg, var(--k) var(--p), rgba(0,0,0,0.09) 0);
     -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
     mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
     transition:filter 0.12s ease;
   }
   .knob.active::before{filter:drop-shadow(0 0 4px var(--k));}
-  /* start/end ticks */
-  .knob::after{
-    content:"";position:absolute;inset:-9px;border-radius:50%;
-    background:
-      radial-gradient(circle at 50% 100%, var(--muted) 0 1.1px, transparent 1.4px);
-    opacity:0;
-  }
   .knob-dial{
     position:relative;
-    width:48px;height:48px;border-radius:50%;
-    background:
-      radial-gradient(circle at 50% 32%, #fbfaf6 0%, #e7e5dc 42%, #cfcdc3 100%);
+    width:46px;height:46px;border-radius:50%;
+    background:radial-gradient(circle at 38% 30%,
+      color-mix(in srgb, var(--k) 55%, #fff) 0%,
+      var(--k) 48%,
+      color-mix(in srgb, var(--k) 72%, #000) 100%);
     box-shadow:
-      0 2px 4px rgba(0,0,0,0.22),
-      0 1px 0 rgba(255,255,255,0.9) inset,
-      0 -3px 6px rgba(0,0,0,0.08) inset,
-      0 0 0 1px rgba(0,0,0,0.06);
+      0 3px 6px rgba(0,0,0,0.28),
+      0 1px 1px rgba(255,255,255,0.45) inset,
+      0 0 0 1px rgba(0,0,0,0.16);
+    transition:transform 0.18s ease;
   }
-  .knob-dial::after{
-    /* colored center cap */
-    content:"";position:absolute;inset:15px;border-radius:50%;
-    background:radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--k) 55%, #fff) 0%, var(--k) 70%);
-    box-shadow:0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1) inset;
-  }
+  .knob:hover .knob-dial{transform:scale(1.05);}
+  .knob.active .knob-dial{transform:scale(1.08);}
   .knob-ind{
     position:absolute;inset:0;border-radius:50%;
     transform:rotate(-135deg);
   }
   .knob-ind::before{
-    content:"";position:absolute;left:50%;top:5px;
-    width:3px;height:12px;margin-left:-1.5px;border-radius:2px;
-    background:var(--ink);
-    box-shadow:0 0 0 0.5px rgba(255,255,255,0.5);
+    content:"";position:absolute;left:50%;top:4px;
+    width:3px;height:13px;margin-left:-1.5px;border-radius:2px;
+    background:#fff;
+    box-shadow:0 0 3px rgba(0,0,0,0.35);
   }
 
   .row label{
     display:flex;flex-direction:column;align-items:center;gap:5px;
-    font-size:9px;letter-spacing:0.08em;text-transform:uppercase;
+    font-size:9px;letter-spacing:0.08em;text-transform:lowercase;
     color:var(--muted);text-align:center;line-height:1.2;margin:0;
     font-weight:700;
   }
@@ -465,6 +582,10 @@
     #sidebar .group{display:none;}
     #sidebar .group.active-module{display:flex;}
   }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important;}
+  }
 </style>
 </head>
 <body>
@@ -475,33 +596,41 @@
         <div class="mark"></div>
         <div class="brand-txt">
           <h1>photo<span>·fx</span></h1>
-          <div class="model">op·fx-1 · gpu image synth</div>
+          <div class="model">op·fx-2 · gpu image synth</div>
         </div>
       </div>
+      <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="toolbar">
         <button id="loadBtn">Load</button>
         <input type="file" id="fileInput" accept="image/*">
-        <button id="randomizeBtn" class="accent2">Random</button>
+        <button id="randomizeBtn">Random</button>
         <button id="resetBtn">Reset</button>
-        <button id="recBtn">● Rec</button>
+        <button id="recBtn">Rec</button>
         <button id="exportBtn" class="primary">Export</button>
       </div>
     </header>
     <div id="canvasWrap">
       <div class="bezel">
         <canvas id="gl"></canvas>
+        <div class="hud" id="hud">
+          <div class="hud-label" id="hudLabel"></div>
+          <div class="hud-value" id="hudValue"></div>
+          <div class="hud-bar"><i id="hudBar"></i></div>
+        </div>
+        <div class="boot" id="boot"><span id="bootText"></span><span class="bcur"></span></div>
         <div class="screen-bar">
           <span class="live"><span class="dot"></span>live</span>
           <span class="rec"><span class="rdot"></span><span id="recTime">rec 0:00</span></span>
+          <span id="tc">00:00:00</span>
           <span>webgl · gpu · 32-bit</span>
         </div>
       </div>
     </div>
-    <footer class="note">Drag &amp; drop an image onto the screen, or hit Load. Twist the encoders — every pixel is processed live on the GPU.</footer>
+    <footer class="note">drag &amp; drop an image onto the screen, or hit load. twist the encoders — every pixel is processed live on the gpu.</footer>
   </div>
 
   <div id="sidebar">
-    <div class="surface-title"><b>control surface</b><span>12 modules</span></div>
+    <div class="surface-title"><b>control surface</b><span id="modCount"></span></div>
 
     <div class="presets">
       <select id="presetSelect" title="Load a preset"></select>
@@ -515,7 +644,7 @@
     </div>
 
     <div class="group c-blue">
-      <h2>Chromatic Aberration</h2>
+      <h2><i class="led"></i>Chromatic Aberration</h2>
       <div class="row">
         <label>amount <span class="val" data-out="ca_amount">0.30</span></label>
         <input type="range" data-u="uCaAmount" min="0" max="1" step="0.01" value="0.3">
@@ -523,7 +652,7 @@
     </div>
 
     <div class="group c-orange">
-      <h2>Halation</h2>
+      <h2><i class="led"></i>Halation</h2>
       <div class="row">
         <label>threshold <span class="val" data-out="halation_threshold">0.55</span></label>
         <input type="range" data-u="uHalationThreshold" min="0" max="1" step="0.01" value="0.55">
@@ -539,7 +668,7 @@
     </div>
 
     <div class="group c-graphite">
-      <h2>Film Grain</h2>
+      <h2><i class="led"></i>Film Grain</h2>
       <div class="row">
         <label>intensity <span class="val" data-out="grain_intensity">0.15</span></label>
         <input type="range" data-u="uGrainIntensity" min="0" max="1" step="0.01" value="0.15">
@@ -551,7 +680,7 @@
     </div>
 
     <div class="group c-green">
-      <h2>Color Grade · lift / gamma / gain</h2>
+      <h2><i class="led"></i>Color Grade · lift / gamma / gain</h2>
       <div class="row">
         <label>lift <span class="val" data-out="lift">0.00</span></label>
         <input type="range" data-u="uLift" min="-0.5" max="0.5" step="0.01" value="0">
@@ -567,7 +696,7 @@
     </div>
 
     <div class="group c-blue">
-      <h2>Vignette</h2>
+      <h2><i class="led"></i>Vignette</h2>
       <div class="row">
         <label>intensity <span class="val" data-out="vignette_intensity">0.40</span></label>
         <input type="range" data-u="uVignetteIntensity" min="0" max="1" step="0.01" value="0.4">
@@ -583,7 +712,7 @@
     </div>
 
     <div class="group c-red">
-      <h2>Warp · Liquify</h2>
+      <h2><i class="led"></i>Warp · Liquify</h2>
       <div class="row">
         <label>amount <span class="val" data-out="warp_amount">0.00</span></label>
         <input type="range" data-u="uWarpAmount" min="-1" max="1" step="0.01" value="0">
@@ -595,7 +724,7 @@
     </div>
 
     <div class="group c-orange">
-      <h2>Glitch · Corruption</h2>
+      <h2><i class="led"></i>Glitch · Corruption</h2>
       <div class="row">
         <label>glitch <span class="val" data-out="glitch_intensity">0.00</span></label>
         <input type="range" data-u="uGlitchIntensity" min="0" max="1" step="0.01" value="0">
@@ -607,7 +736,7 @@
     </div>
 
     <div class="group c-purple">
-      <h2>Kaleidoscope</h2>
+      <h2><i class="led"></i>Kaleidoscope</h2>
       <div class="row">
         <label>segments <span class="val" data-out="kaleido_segments">0.00</span></label>
         <input type="range" data-u="uKaleidoSegments" min="0" max="16" step="1" value="0">
@@ -619,7 +748,7 @@
     </div>
 
     <div class="group c-cyan">
-      <h2>Warp Tunnel · droste</h2>
+      <h2><i class="led"></i>Warp Tunnel · droste</h2>
       <div class="row">
         <label>amount <span class="val" data-out="tunnel_amount">0.00</span></label>
         <input type="range" data-u="uTunnelAmount" min="0" max="1" step="0.01" value="0">
@@ -635,7 +764,7 @@
     </div>
 
     <div class="group c-pink">
-      <h2>3D Relief · heightfield</h2>
+      <h2><i class="led"></i>3D Relief · heightfield</h2>
       <div class="row">
         <label>depth <span class="val" data-out="relief_depth">0.00</span></label>
         <input type="range" data-u="uReliefDepth" min="0" max="1" step="0.01" value="0">
@@ -647,7 +776,7 @@
     </div>
 
     <div class="group c-teal">
-      <h2>Glass Sphere · refraction</h2>
+      <h2><i class="led"></i>Glass Sphere · refraction</h2>
       <div class="row">
         <label>bulge <span class="val" data-out="sphere_amount">0.00</span></label>
         <input type="range" data-u="uSphereAmount" min="0" max="1" step="0.01" value="0">
@@ -659,7 +788,7 @@
     </div>
 
     <div class="group c-azure">
-      <h2>3D Ripple · pond</h2>
+      <h2><i class="led"></i>3D Ripple · pond</h2>
       <div class="row">
         <label>amount <span class="val" data-out="ripple_amount">0.00</span></label>
         <input type="range" data-u="uRippleAmount" min="0" max="1" step="0.01" value="0">
@@ -671,6 +800,50 @@
       <div class="row">
         <label>speed <span class="val" data-out="ripple_speed">1.00</span></label>
         <input type="range" data-u="uRippleSpeed" min="0" max="2" step="0.01" value="1.0">
+      </div>
+    </div>
+
+    <div class="group c-mint">
+      <h2><i class="led"></i>Tiny Planet · stereographic</h2>
+      <div class="row">
+        <label>planet <span class="val" data-out="planet_amount">0.00</span></label>
+        <input type="range" data-u="uPlanetAmount" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>zoom <span class="val" data-out="planet_zoom">1.00</span></label>
+        <input type="range" data-u="uPlanetZoom" min="0.3" max="2" step="0.01" value="1.0">
+      </div>
+      <div class="row">
+        <label>spin <span class="val" data-out="planet_spin">0.20</span></label>
+        <input type="range" data-u="uPlanetSpin" min="-1" max="1" step="0.01" value="0.2">
+      </div>
+    </div>
+
+    <div class="group c-amber">
+      <h2><i class="led"></i>Photo Cube · raytraced</h2>
+      <div class="row">
+        <label>cube <span class="val" data-out="cube_amount">0.00</span></label>
+        <input type="range" data-u="uCubeAmount" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>spin <span class="val" data-out="cube_spin">0.50</span></label>
+        <input type="range" data-u="uCubeSpin" min="0" max="2" step="0.01" value="0.5">
+      </div>
+    </div>
+
+    <div class="group c-indigo">
+      <h2><i class="led"></i>Terrain Flight · raymarched</h2>
+      <div class="row">
+        <label>fly <span class="val" data-out="terrain_amount">0.00</span></label>
+        <input type="range" data-u="uTerrainAmount" min="0" max="1" step="0.01" value="0">
+      </div>
+      <div class="row">
+        <label>height <span class="val" data-out="terrain_height">0.50</span></label>
+        <input type="range" data-u="uTerrainHeight" min="0" max="1" step="0.01" value="0.5">
+      </div>
+      <div class="row">
+        <label>speed <span class="val" data-out="terrain_speed">0.80</span></label>
+        <input type="range" data-u="uTerrainSpeed" min="0" max="2" step="0.01" value="0.8">
       </div>
     </div>
 
@@ -734,6 +907,14 @@
     "uniform float uRippleAmount;",
     "uniform float uRippleFreq;",
     "uniform float uRippleSpeed;",
+    "uniform float uPlanetAmount;",
+    "uniform float uPlanetZoom;",
+    "uniform float uPlanetSpin;",
+    "uniform float uCubeAmount;",
+    "uniform float uCubeSpin;",
+    "uniform float uTerrainAmount;",
+    "uniform float uTerrainHeight;",
+    "uniform float uTerrainSpeed;",
 
     "float hash(vec2 p){",
     "  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);",
@@ -751,7 +932,10 @@
     "  const float PI = 3.14159265;",
     "  float reliefShade = 1.0;",
     "  float rippleShade = 1.0;",
+    "  float sceneShade = 1.0;",
     "  float sphereHi = 0.0;",
+    "  float planetGlow = 0.0;",
+    "  vec3 fogAdd = vec3(0.0);",
 
     // --- glitch: screen-space horizontal slice displacement + channel corruption ---
     "  float burst = floor(uTime * 6.0);",
@@ -794,6 +978,88 @@
     "    uv = mix(uv, tuv, uTunnelAmount);",
     "  }",
 
+    // --- tiny planet: inverse stereographic projection, the image wraps into a
+    //     spinning globe (top of the image at the pole, bottom at the horizon) ---
+    "  if (uPlanetAmount > 0.001) {",
+    "    vec2 pp = (uv - center) * 2.0; pp.x *= aspect;",
+    "    pp /= max(uPlanetZoom, 0.05);",
+    "    float pr = length(pp);",
+    "    float lon = atan(pp.y, pp.x) + uTime * uPlanetSpin * 0.8;",
+    "    float lat = 2.0 * atan(pr);",
+    "    vec2 puv = vec2(fract(lon / (2.0 * PI) + 0.5), 1.0 - lat / PI);",
+    "    uv = mix(uv, puv, uPlanetAmount);",
+    "    planetGlow = smoothstep(0.80, 0.97, lat / PI) * uPlanetAmount * 0.35;",
+    "  }",
+
+    // --- photo cube: raytrace a spinning textured box; misses land on a dim,
+    //     slowly drifting copy of the image behind it ---
+    "  if (uCubeAmount > 0.001) {",
+    "    float ct = uTime * uCubeSpin * 0.9 + 0.6;",
+    "    float cy = cos(ct), sy = sin(ct);",
+    "    float cx = cos(ct * 0.62 + 0.4), sx = sin(ct * 0.62 + 0.4);",
+    "    mat3 rot = mat3(cy, 0.0, -sy,  0.0, 1.0, 0.0,  sy, 0.0, cy)",
+    "             * mat3(1.0, 0.0, 0.0,  0.0, cx, sx,  0.0, -sx, cx);",
+    "    vec2 sc = (vUv - 0.5) * 2.0; sc.x *= aspect;",
+    "    vec3 ro = rot * vec3(0.0, 0.0, 3.2);",
+    "    vec3 rdir = rot * normalize(vec3(sc * 0.62, -1.6));",
+    "    vec3 rs2 = sign(rdir) * max(abs(rdir), vec3(1e-4));",
+    "    vec3 mI = 1.0 / rs2;",
+    "    vec3 nn = mI * ro;",
+    "    vec3 kk = abs(mI) * 0.62;",
+    "    vec3 t1v = -nn - kk; vec3 t2v = -nn + kk;",
+    "    float tN = max(max(t1v.x, t1v.y), t1v.z);",
+    "    float tF = min(min(t2v.x, t2v.y), t2v.z);",
+    "    vec2 cUv; float cShade;",
+    "    if (tN < tF && tN > 0.0) {",
+    "      vec3 hp = ro + rdir * tN;",
+    "      vec3 nB = -sign(rs2) * step(t1v.yzx, t1v.xyz) * step(t1v.zxy, t1v.xyz);",
+    "      if (abs(nB.x) > 0.5)      cUv = vec2(hp.z * sign(nB.x), hp.y);",
+    "      else if (abs(nB.y) > 0.5) cUv = vec2(hp.x, hp.z * sign(nB.y));",
+    "      else                      cUv = vec2(-hp.x * sign(nB.z), hp.y);",
+    "      cUv = cUv / 1.24 + 0.5;",
+    "      vec3 Lb = rot * normalize(vec3(0.5, 0.7, 0.55));",
+    "      cShade = 0.3 + 0.85 * max(dot(nB, Lb), 0.0);",
+    "      cShade += pow(max(dot(reflect(rdir, nB), Lb), 0.0), 24.0) * 0.6;",
+    "      vec2 fw = abs(cUv - 0.5) * 2.0;",
+    "      cShade *= 1.0 - smoothstep(0.86, 1.0, max(fw.x, fw.y)) * 0.35;",
+    "    } else {",
+    "      cUv = center + (vUv - center) * 1.2 + vec2(sin(uTime * 0.1), cos(uTime * 0.13)) * 0.012;",
+    "      cShade = 0.24;",
+    "    }",
+    "    uv = mix(uv, cUv, uCubeAmount);",
+    "    sceneShade *= mix(1.0, cShade, uCubeAmount);",
+    "  }",
+
+    // --- terrain flight: raymarch the image's luminance as a 3D heightfield and
+    //     fly over it, with depth shading and distance fog ---
+    "  if (uTerrainAmount > 0.001) {",
+    "    vec2 sc2 = vUv - 0.5; sc2.x *= aspect;",
+    "    float hAmp = 0.06 + uTerrainHeight * 0.34;",
+    "    vec3 tro = vec3(0.5, 0.34 + uTerrainHeight * 0.12, uTime * (0.06 + uTerrainSpeed * 0.14));",
+    "    vec3 trd = normalize(vec3(sc2.x * 1.15, sc2.y * 1.15 - 0.16, 1.0));",
+    "    float tt = 0.04; float hitT = -1.0; vec2 hUv = vec2(0.5);",
+    "    for (int i = 0; i < 60; i++) {",
+    "      vec3 p = tro + trd * tt;",
+    "      vec2 g = fract(vec2(p.x, p.z));",
+    "      if (p.y < lumAt(g) * hAmp) { hitT = tt; hUv = g; break; }",
+    "      tt += 0.015 + tt * 0.055;",
+    "      if (tt > 3.0) break;",
+    "    }",
+    "    vec2 tUv; float tShade; float fogF;",
+    "    if (hitT > 0.0) {",
+    "      tUv = hUv;",
+    "      tShade = clamp(1.45 - hitT * 0.6, 0.2, 1.25);",
+    "      fogF = smoothstep(0.7, 2.6, hitT);",
+    "    } else {",
+    "      tUv = vec2(vUv.x, clamp(0.5 + vUv.y * 0.5, 0.0, 1.0));",
+    "      tShade = 0.35;",
+    "      fogF = 0.85;",
+    "    }",
+    "    uv = mix(uv, tUv, uTerrainAmount);",
+    "    sceneShade *= mix(1.0, tShade, uTerrainAmount);",
+    "    fogAdd += vec3(0.62, 0.66, 0.78) * fogF * uTerrainAmount * 0.5;",
+    "  }",
+
     // --- 3D relief: treat luminance as a heightfield, orbiting light + parallax ---
     "  if (uReliefDepth > 0.001) {",
     "    float e = 1.6 / uResolution.x;",
@@ -829,12 +1095,12 @@
     // --- 3D ripple: animated concentric water waves, radial lensing + shimmer ---
     "  if (uRippleAmount > 0.001) {",
     "    vec2 rp = uv - center; rp.x *= aspect;",
-    "    float rd = length(rp);",
+    "    float rd2 = length(rp);",
     "    float k = uRippleFreq * 60.0 + 6.0;",
-    "    float phase = rd * k - uTime * uRippleSpeed * 4.0;",
+    "    float phase = rd2 * k - uTime * uRippleSpeed * 4.0;",
     "    float wave = sin(phase);",
     "    float dwave = cos(phase) * k;",
-    "    vec2 dir = rp / max(rd, 0.001);",
+    "    vec2 dir = rp / max(rd2, 0.001);",
     "    vec2 off = dir * dwave * uRippleAmount * 0.0006; off.x /= aspect;",
     "    uv += off;",
     "    rippleShade = clamp(1.0 + wave * uRippleAmount * 0.5, 0.5, 1.6);",
@@ -869,10 +1135,14 @@
     "  bloomAccum /= float(TAPS);",
     "  color += bloomAccum * uHalationIntensity * vec3(1.0, 0.55, 0.3) * 3.0;",
 
-    // --- apply 3D shading: relief light, ripple shimmer, glass highlight ---
+    // --- apply 3D shading: relief light, ripple shimmer, scene lighting,
+    //     glass highlight, terrain fog, planet atmosphere ---
     "  color *= reliefShade;",
     "  color *= rippleShade;",
+    "  color *= sceneShade;",
     "  color += sphereHi;",
+    "  color += fogAdd;",
+    "  color += vec3(0.45, 0.62, 1.0) * planetGlow;",
 
     // --- color grade: lift / gamma / gain (ASC CDL order) ---
     "  color = clamp(color * uGain + uLift, 0.0, 1.0);",
@@ -924,13 +1194,21 @@
   gl.enableVertexAttribArray(aPos);
   gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
+  // every parameter uniform is discovered from the DOM, so adding a module is
+  // just markup + a shader block
+  var sliders = Array.prototype.slice.call(document.querySelectorAll("input[type=range]"));
+  var sliderByU = {};
+  var defaultByU = {};
+  sliders.forEach(function(s){
+    var u = s.getAttribute("data-u");
+    sliderByU[u] = s;
+    defaultByU[u] = parseFloat(s.defaultValue);
+  });
+
   var uniformLoc = {};
-  ["uTexture","uResolution","uTime","uCaAmount","uHalationThreshold","uHalationIntensity",
-   "uHalationRadius","uGrainIntensity","uGrainSize","uLift","uGamma","uGain",
-   "uVignetteIntensity","uVignetteRadius","uVignetteSoftness","uWarpAmount","uWarpRadius",
-   "uGlitchIntensity","uScanlineIntensity","uKaleidoSegments","uKaleidoSpin","uTunnelAmount",
-   "uTunnelSpeed","uTunnelTwist","uReliefDepth","uReliefSpeed","uSphereAmount","uSphereRadius",
-   "uRippleAmount","uRippleFreq","uRippleSpeed"].forEach(function(name){
+  ["uTexture","uResolution","uTime"].concat(sliders.map(function(s){
+    return s.getAttribute("data-u");
+  })).forEach(function(name){
     uniformLoc[name] = gl.getUniformLocation(program, name);
   });
 
@@ -1009,32 +1287,104 @@
     return c;
   }
 
-  var img = new Image();
-  img.onload = function(){ loadImageSource(img); };
-  img.crossOrigin = "anonymous";
-
   loadImageSource(makePlaceholderImage());
+
+  var reducedMotion = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---- UI wiring ----
   var state = {};
-  var sliders = Array.prototype.slice.call(document.querySelectorAll("input[type=range]"));
 
   function fmt(v){
     return (Math.round(v * 100) / 100).toFixed(2);
   }
 
-  function syncSlider(slider){
+  // parameter HUD on the display
+  var hudEl = document.getElementById("hud");
+  var hudLabel = document.getElementById("hudLabel");
+  var hudValue = document.getElementById("hudValue");
+  var hudBar = document.getElementById("hudBar");
+  var hudTimer = null;
+
+  function showHud(slider){
+    var min = parseFloat(slider.min), max = parseFloat(slider.max);
+    var v = parseFloat(slider.value);
+    hudLabel.textContent = slider._hudName || slider.getAttribute("data-u");
+    hudValue.textContent = fmt(v);
+    hudBar.style.width = (((v - min) / (max - min)) * 100) + "%";
+    hudEl.classList.add("show");
+    clearTimeout(hudTimer);
+    hudTimer = setTimeout(function(){ hudEl.classList.remove("show"); }, 900);
+  }
+
+  function syncSlider(slider, quiet){
     var name = slider.getAttribute("data-u");
     state[name] = parseFloat(slider.value);
     var out = slider.parentElement.querySelector(".val");
     if (out) out.textContent = fmt(state[name]);
     if (slider._knobUpdate) slider._knobUpdate();
+    if (!quiet) showHud(slider);
+    scheduleLeds();
   }
 
   sliders.forEach(function(slider){
-    syncSlider(slider);
+    syncSlider(slider, true);
     slider.addEventListener("input", function(){ syncSlider(slider); });
   });
+
+  // ---- module activity LEDs (mutable-style): a module lights up whenever any
+  //      of its encoders leaves its default position ----
+  var groups = Array.prototype.slice.call(document.querySelectorAll("#sidebar .group"));
+  var groupSliders = groups.map(function(g){
+    return Array.prototype.slice.call(g.querySelectorAll("input[type=range]"));
+  });
+  var activityCount = 0;
+  var ledsPending = false;
+
+  function updateModuleLEDs(){
+    activityCount = 0;
+    groups.forEach(function(g, i){
+      var lit = groupSliders[i].some(function(s){
+        return Math.abs(parseFloat(s.value) - defaultByU[s.getAttribute("data-u")]) > 1e-6;
+      });
+      g.classList.toggle("lit", lit);
+      if (lit) activityCount++;
+    });
+  }
+  function scheduleLeds(){
+    if (ledsPending) return;
+    ledsPending = true;
+    requestAnimationFrame(function(){ ledsPending = false; updateModuleLEDs(); });
+  }
+  updateModuleLEDs();
+
+  // ---- smooth value transitions: presets / random / reset morph the encoders
+  //      instead of snapping, so the picture glides between looks ----
+  var tweenRAF = null;
+
+  function animateValues(target, dur){
+    var startVals = {}, endVals = {};
+    sliders.forEach(function(s){
+      var u = s.getAttribute("data-u");
+      startVals[u] = parseFloat(s.value);
+      endVals[u] = (u in target) ? target[u] : startVals[u];
+    });
+    if (tweenRAF) cancelAnimationFrame(tweenRAF);
+    if (reducedMotion) dur = 0;
+    var t0 = performance.now();
+    function easeOut(x){ return 1 - Math.pow(1 - x, 3); }
+    function frame(now){
+      var k = dur > 0 ? Math.min((now - t0) / dur, 1) : 1;
+      var e = easeOut(k);
+      sliders.forEach(function(s){
+        var u = s.getAttribute("data-u");
+        s.value = startVals[u] + (endVals[u] - startVals[u]) * e;
+        syncSlider(s, true);
+      });
+      tweenRAF = k < 1 ? requestAnimationFrame(frame) : null;
+    }
+    tweenRAF = requestAnimationFrame(frame);
+  }
 
   // ---- rotary encoders: build a knob for every slider ----
   function buildKnob(slider){
@@ -1044,6 +1394,16 @@
     var step = parseFloat(slider.step) || 0.01;
 
     slider.classList.add("knobbed");
+
+    var group = slider.closest ? slider.closest(".group") : null;
+    var groupName = "";
+    if (group) {
+      var h2 = group.querySelector("h2");
+      if (h2) groupName = h2.textContent.trim().split("·")[0].trim();
+    }
+    var labelNode = row.querySelector("label");
+    var paramName = labelNode ? labelNode.childNodes[0].textContent.trim() : "";
+    slider._hudName = (groupName + " · " + paramName).toLowerCase();
 
     var knob = document.createElement("div");
     knob.className = "knob";
@@ -1095,21 +1455,20 @@
     knob.addEventListener("pointerup", endDrag);
     knob.addEventListener("pointercancel", endDrag);
 
-    // wheel to fine-tune, double-click to reset to default
+    // wheel to fine-tune, double-click to glide back to default
     knob.addEventListener("wheel", function(e){
       e.preventDefault();
       startVal = parseFloat(slider.value);
       setFromDelta(-e.deltaY * 0.4);
     }, { passive: false });
     knob.addEventListener("dblclick", function(){
-      slider.value = slider.defaultValue;
-      syncSlider(slider);
+      var t = {};
+      t[slider.getAttribute("data-u")] = defaultByU[slider.getAttribute("data-u")];
+      animateValues(t, 350);
     });
   }
 
   sliders.forEach(buildKnob);
-
-  var defaults = sliders.map(function(s){ return s.value; });
 
   // Randomize: freely vary the subtle "look" params, but only engage a small
   // random subset of the heavy structural effects — otherwise a dominant effect
@@ -1125,7 +1484,10 @@
     { on:"uTunnelAmount",    extra:["uTunnelSpeed","uTunnelTwist"] },
     { on:"uReliefDepth",     extra:["uReliefSpeed"] },
     { on:"uSphereAmount",    extra:["uSphereRadius"] },
-    { on:"uRippleAmount",    extra:["uRippleFreq","uRippleSpeed"] }
+    { on:"uRippleAmount",    extra:["uRippleFreq","uRippleSpeed"] },
+    { on:"uPlanetAmount",    extra:["uPlanetZoom","uPlanetSpin"] },
+    { on:"uCubeAmount",      extra:["uCubeSpin"] },
+    { on:"uTerrainAmount",   extra:["uTerrainHeight","uTerrainSpeed"] }
   ];
   function rndSnap(v, step){ return Math.round(v / step) * step; }
   function rndFull(s){
@@ -1142,32 +1504,30 @@
   }
   document.getElementById("randomizeBtn").addEventListener("click", function(){
     // start from defaults so unchosen structural effects stay off
-    sliders.forEach(function(s, i){ s.value = defaults[i]; });
+    var target = {};
+    sliders.forEach(function(s){
+      var u = s.getAttribute("data-u");
+      target[u] = defaultByU[u];
+    });
     // vary the always-safe look params
-    RND_LOOK.forEach(function(u){ if (sliderByU[u]) sliderByU[u].value = rndFull(sliderByU[u]); });
+    RND_LOOK.forEach(function(u){ if (sliderByU[u]) target[u] = rndFull(sliderByU[u]); });
     // engage 0-2 structural effects, chosen at random
     var pool = RND_STRUCTURAL.slice();
     for (var i = pool.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
     var count = Math.floor(Math.random() * 3);
     for (var k = 0; k < count; k++){
       var eff = pool[k];
-      if (sliderByU[eff.on]) sliderByU[eff.on].value = rndActive(sliderByU[eff.on]);
-      eff.extra.forEach(function(u){ if (sliderByU[u]) sliderByU[u].value = rndFull(sliderByU[u]); });
+      if (sliderByU[eff.on]) target[eff.on] = rndActive(sliderByU[eff.on]);
+      eff.extra.forEach(function(u){ if (sliderByU[u]) target[u] = rndFull(sliderByU[u]); });
     }
-    sliders.forEach(syncSlider);
+    animateValues(target, 550);
   });
 
   document.getElementById("resetBtn").addEventListener("click", function(){
-    sliders.forEach(function(slider, i){
-      slider.value = defaults[i];
-      syncSlider(slider);
-    });
+    animateValues(defaultByU, 500);
   });
 
   // ---- presets ----
-  var sliderByU = {};
-  sliders.forEach(function(s){ sliderByU[s.getAttribute("data-u")] = s; });
-
   // curated starting points (only non-default params listed; the rest reset)
   var BUILTIN = {
     "Cinematic":   { uCaAmount:0.15, uHalationThreshold:0.6, uHalationIntensity:0.5, uHalationRadius:2.5, uLift:-0.02, uGamma:1.05, uVignetteIntensity:0.6, uGrainIntensity:0.12 },
@@ -1178,11 +1538,16 @@
     "Corrupted":   { uGlitchIntensity:0.6, uScanlineIntensity:0.5, uCaAmount:0.7, uGrainIntensity:0.3, uHalationIntensity:0.4 },
     "Fishbowl":    { uSphereAmount:0.7, uSphereRadius:0.5, uCaAmount:0.35, uHalationIntensity:0.4, uVignetteIntensity:0.5, uGrainIntensity:0.12 },
     "Ripple Pool": { uRippleAmount:0.6, uRippleFreq:0.35, uRippleSpeed:1.0, uCaAmount:0.3, uHalationIntensity:0.5, uGrainIntensity:0.12 },
+    "Tiny Planet": { uPlanetAmount:1, uPlanetZoom:0.55, uPlanetSpin:0.3, uCaAmount:0.3, uHalationIntensity:0.5, uVignetteIntensity:0.5, uGrainIntensity:0.12 },
+    "Photo Cube":  { uCubeAmount:1, uCubeSpin:0.5, uCaAmount:0.25, uHalationIntensity:0.45, uVignetteIntensity:0.45, uGrainIntensity:0.1, uGamma:1.05 },
+    "Overflight":  { uTerrainAmount:1, uTerrainHeight:0.55, uTerrainSpeed:0.9, uHalationThreshold:0.5, uHalationIntensity:0.5, uVignetteIntensity:0.45, uGrainIntensity:0.15 },
     "Crystal Ball":{ uSphereAmount:0.85, uSphereRadius:0.55, uRippleAmount:0.2, uRippleFreq:0.25, uRippleSpeed:0.6, uHalationThreshold:0.5, uHalationIntensity:0.55, uHalationRadius:2.6, uVignetteIntensity:0.55, uCaAmount:0.3, uGrainIntensity:0.12 },
     "Hyperspace":  { uTunnelAmount:0.7, uTunnelSpeed:0.8, uTunnelTwist:0.5, uSphereAmount:0.4, uSphereRadius:0.6, uKaleidoSegments:6, uKaleidoSpin:0.3, uCaAmount:0.5, uHalationIntensity:0.6, uVignetteIntensity:0.4 },
     "Liquid Chrome":{ uRippleAmount:0.6, uRippleFreq:0.4, uRippleSpeed:1.2, uReliefDepth:0.5, uReliefSpeed:0.8, uCaAmount:0.35, uGain:1.15, uGamma:0.9, uHalationIntensity:0.5, uVignetteIntensity:0.45 },
     "Wormhole":    { uKaleidoSegments:8, uKaleidoSpin:0.4, uTunnelAmount:0.6, uTunnelSpeed:0.7, uTunnelTwist:0.6, uRippleAmount:0.3, uRippleFreq:0.3, uRippleSpeed:1.0, uCaAmount:0.45, uHalationIntensity:0.5 },
-    "Melting Glass":{ uSphereAmount:0.6, uSphereRadius:0.65, uRippleAmount:0.5, uRippleFreq:0.5, uRippleSpeed:0.9, uWarpAmount:0.3, uWarpRadius:0.6, uReliefDepth:0.4, uCaAmount:0.4, uHalationIntensity:0.4, uGrainIntensity:0.15 }
+    "Melting Glass":{ uSphereAmount:0.6, uSphereRadius:0.65, uRippleAmount:0.5, uRippleFreq:0.5, uRippleSpeed:0.9, uWarpAmount:0.3, uWarpRadius:0.6, uReliefDepth:0.4, uCaAmount:0.4, uHalationIntensity:0.4, uGrainIntensity:0.15 },
+    "Cube Glitch": { uCubeAmount:1, uCubeSpin:0.8, uGlitchIntensity:0.45, uScanlineIntensity:0.35, uCaAmount:0.5, uGrainIntensity:0.2 },
+    "Planet Ripple":{ uPlanetAmount:1, uPlanetZoom:0.6, uPlanetSpin:0.35, uRippleAmount:0.35, uRippleFreq:0.3, uRippleSpeed:0.8, uHalationIntensity:0.5, uCaAmount:0.35 }
   };
 
   var PRESET_KEY = "photofx_presets_v1";
@@ -1195,12 +1560,13 @@
   }
 
   function applyPreset(values){
-    // reset everything to default first so presets are deterministic
-    sliders.forEach(function(s, i){ s.value = defaults[i]; });
-    Object.keys(values).forEach(function(u){
-      if (sliderByU[u]) sliderByU[u].value = values[u];
+    // start from defaults so presets are deterministic, then glide there
+    var target = {};
+    sliders.forEach(function(s){
+      var u = s.getAttribute("data-u");
+      target[u] = (u in values) ? values[u] : defaultByU[u];
     });
-    sliders.forEach(syncSlider);
+    animateValues(target, 600);
   }
   function captureCurrent(){
     var v = {};
@@ -1265,7 +1631,6 @@
 
   // ---- module selector: on mobile, show one effect at a time so the
   //      screen stays visible while you tune it ----
-  var groups = Array.prototype.slice.call(document.querySelectorAll("#sidebar .group"));
   var moduleSelect = document.getElementById("moduleSelect");
   groups.forEach(function(g, i){
     var h2 = g.querySelector("h2");
@@ -1282,6 +1647,32 @@
   moduleSelect.addEventListener("change", function(){
     setActiveModule(parseInt(moduleSelect.value, 10) || 0);
   });
+
+  // module count + staggered entrance
+  document.getElementById("modCount").textContent = groups.length + " modules";
+  groups.forEach(function(g, i){ g.style.animationDelay = (0.05 + i * 0.045) + "s"; });
+
+  // ---- boot sequence on the display ----
+  (function(){
+    var bootEl = document.getElementById("boot");
+    var bootText = document.getElementById("bootText");
+    function dismiss(){
+      bootEl.classList.add("off");
+      setTimeout(function(){ if (bootEl.parentNode) bootEl.parentNode.removeChild(bootEl); }, 600);
+    }
+    if (reducedMotion) { dismiss(); return; }
+    var msg = "photo·fx os 2.0 · " + groups.length + " modules · gpu ready";
+    var i = 0;
+    (function type(){
+      if (i <= msg.length) {
+        bootText.textContent = msg.slice(0, i);
+        i++;
+        setTimeout(type, 22);
+      } else {
+        setTimeout(dismiss, 650);
+      }
+    })();
+  })();
 
   // ---- record live animation to WebM ----
   var recBtn = document.getElementById("recBtn");
@@ -1323,7 +1714,7 @@
     };
     recorder.start();
     recStart = performance.now();
-    recBtn.textContent = "■ Stop";
+    recBtn.textContent = "Stop";
     recBtn.classList.add("rec-on");
     screenBar.classList.add("recording");
     recTimeEl.textContent = "rec 0:00";
@@ -1334,7 +1725,7 @@
     if (recStream) recStream.getTracks().forEach(function(t){ t.stop(); });
     recorder = null; recStream = null;
     clearInterval(recTimer); recTimer = null;
-    recBtn.textContent = "● Rec";
+    recBtn.textContent = "Rec";
     recBtn.classList.remove("rec-on");
     screenBar.classList.remove("recording");
   }
@@ -1414,34 +1805,9 @@
 
     gl.uniform2f(uniformLoc.uResolution, canvas.width, canvas.height);
     gl.uniform1f(uniformLoc.uTime, t);
-    gl.uniform1f(uniformLoc.uCaAmount, state.uCaAmount);
-    gl.uniform1f(uniformLoc.uHalationThreshold, state.uHalationThreshold);
-    gl.uniform1f(uniformLoc.uHalationIntensity, state.uHalationIntensity);
-    gl.uniform1f(uniformLoc.uHalationRadius, state.uHalationRadius);
-    gl.uniform1f(uniformLoc.uGrainIntensity, state.uGrainIntensity);
-    gl.uniform1f(uniformLoc.uGrainSize, state.uGrainSize);
-    gl.uniform1f(uniformLoc.uLift, state.uLift);
-    gl.uniform1f(uniformLoc.uGamma, state.uGamma);
-    gl.uniform1f(uniformLoc.uGain, state.uGain);
-    gl.uniform1f(uniformLoc.uVignetteIntensity, state.uVignetteIntensity);
-    gl.uniform1f(uniformLoc.uVignetteRadius, state.uVignetteRadius);
-    gl.uniform1f(uniformLoc.uVignetteSoftness, state.uVignetteSoftness);
-    gl.uniform1f(uniformLoc.uWarpAmount, state.uWarpAmount);
-    gl.uniform1f(uniformLoc.uWarpRadius, state.uWarpRadius);
-    gl.uniform1f(uniformLoc.uGlitchIntensity, state.uGlitchIntensity);
-    gl.uniform1f(uniformLoc.uScanlineIntensity, state.uScanlineIntensity);
-    gl.uniform1f(uniformLoc.uKaleidoSegments, state.uKaleidoSegments);
-    gl.uniform1f(uniformLoc.uKaleidoSpin, state.uKaleidoSpin);
-    gl.uniform1f(uniformLoc.uTunnelAmount, state.uTunnelAmount);
-    gl.uniform1f(uniformLoc.uTunnelSpeed, state.uTunnelSpeed);
-    gl.uniform1f(uniformLoc.uTunnelTwist, state.uTunnelTwist);
-    gl.uniform1f(uniformLoc.uReliefDepth, state.uReliefDepth);
-    gl.uniform1f(uniformLoc.uReliefSpeed, state.uReliefSpeed);
-    gl.uniform1f(uniformLoc.uSphereAmount, state.uSphereAmount);
-    gl.uniform1f(uniformLoc.uSphereRadius, state.uSphereRadius);
-    gl.uniform1f(uniformLoc.uRippleAmount, state.uRippleAmount);
-    gl.uniform1f(uniformLoc.uRippleFreq, state.uRippleFreq);
-    gl.uniform1f(uniformLoc.uRippleSpeed, state.uRippleSpeed);
+    for (var name in state) {
+      if (uniformLoc[name]) gl.uniform1f(uniformLoc[name], state[name]);
+    }
     gl.uniform1i(uniformLoc.uTexture, 0);
 
     gl.activeTexture(gl.TEXTURE0);
@@ -1450,8 +1816,29 @@
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 
+  // header VU meter + tape counter animate off the same clock as the shader
+  var meterLeds = Array.prototype.slice.call(document.querySelectorAll(".meter i"));
+  var tcEl = document.getElementById("tc");
+  var frame = 0;
+
+  function pad2(n){ return ("0" + n).slice(-2); }
+
+  function updatePanel(t){
+    if (!reducedMotion) {
+      var lvl = Math.round(2 + activityCount * 1.1 + Math.sin(t * 2.3) * 1.3 + Math.sin(t * 5.1) * 0.9);
+      lvl = Math.max(1, Math.min(8, lvl));
+      for (var i = 0; i < meterLeds.length; i++){
+        meterLeds[i].classList.toggle("on", i < lvl);
+      }
+    }
+    var s = Math.floor(t);
+    tcEl.textContent = pad2(Math.floor(s / 60)) + ":" + pad2(s % 60) + ":" + pad2(Math.floor((t % 1) * 30));
+  }
+
   function loop(now){
     render(now);
+    frame++;
+    if (frame % 3 === 0) updatePanel((now - startTime) / 1000);
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);

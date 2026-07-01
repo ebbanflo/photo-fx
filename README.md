@@ -9,13 +9,31 @@ libraries, no network calls.
 
 ## Interface
 
-The UI is styled after Teenage Engineering / OP-1 hardware: an aluminum chassis,
-a dark inset "screen" bezel around the canvas, and every parameter is a colored
-**rotary encoder** rather than a plain slider.
+The UI is styled after Teenage Engineering's OP-1 with details borrowed from
+Mutable Instruments' Eurorack panels: a flat cream chassis, a dark inset
+"screen" bezel around the canvas, solid-color OP-1-style encoder discs, and
+MI-style module cards with hairline rules, corner alignment crosses, and a
+per-module **activity LED** that lights up whenever any of its encoders leaves
+its default position.
+
+The interface is animated throughout:
+
+- A **boot sequence** types itself out on the screen when the app loads, and
+  the modules stagger in one after another.
+- Turning any encoder pops a **parameter HUD** on the display — module name,
+  value, and a level bar — that fades out when you stop, like tweaking a synth.
+- Presets, Random, Reset, and double-click all **glide the encoders** to their
+  targets over ~half a second instead of snapping, so the image morphs smoothly
+  between looks.
+- A dancing **LED level meter** in the header and a tape-style **timecode
+  counter** on the screen run off the same clock as the shader.
+- All decorative motion is disabled under `prefers-reduced-motion`.
+
+Encoder gestures:
 
 - **Drag a knob** vertically to change its value.
 - **Scroll** over a knob to fine-tune.
-- **Double-click** a knob to reset it to its default.
+- **Double-click** a knob to glide it back to its default.
 
 Under the hood each knob drives a hidden `<input type=range>`, so it stays fully
 keyboard/programmatic-friendly while looking like a physical control.
@@ -46,9 +64,10 @@ placeholder sunset image loads by default so you can see the effects immediately
 A preset selector sits at the top of the control surface.
 
 - Choose a **built-in** preset to jump to a curated look — Cinematic, Dreamwave,
-  Kaleido Trip, Vortex, Sculpture 3D, Corrupted, Fishbowl, Ripple Pool, and the
-  3D combo presets Crystal Ball, Hyperspace, Liquid Chrome, Wormhole, and
-  Melting Glass.
+  Kaleido Trip, Vortex, Sculpture 3D, Corrupted, Fishbowl, Ripple Pool, Tiny
+  Planet, Photo Cube, Overflight, and the 3D combo presets Crystal Ball,
+  Hyperspace, Liquid Chrome, Wormhole, Melting Glass, Cube Glitch, and
+  Planet Ripple.
 - **Save** captures the current knob positions as a named preset, stored in
   `localStorage` so it persists across sessions.
 - **Del** removes one of your saved presets (built-ins can't be deleted).
@@ -64,8 +83,9 @@ are all captured in motion. The clip downloads as `photo-fx-clip.webm`.
 
 All effects are implemented as a single WebGL fragment shader that samples the
 source image and applies each effect in sequence: warp, kaleidoscope, tunnel,
-3D relief, glass sphere, 3D ripple, chromatic aberration, halation, color grade,
-vignette, grain, and glitch/scanlines. A `requestAnimationFrame` loop redraws so
+tiny planet, photo cube, terrain flight, 3D relief, glass sphere, 3D ripple,
+chromatic aberration, halation, color grade, vignette, grain, and
+glitch/scanlines. A `requestAnimationFrame` loop redraws so
 time-based effects animate continuously. Images are downscaled client-side to a
 2048px max dimension before being uploaded as a texture, keeping the shader fast
 on large photos. Textures are uploaded with `UNPACK_FLIP_Y_WEBGL` so images
@@ -147,6 +167,31 @@ that moves over time.
 - *Amount* — wave height / distortion strength.
 - *Rings* — spatial frequency of the waves.
 - *Speed* — how fast the ripples travel outward.
+
+**Tiny Planet (Stereographic)** — An inverse stereographic projection that
+wraps the whole image into a spinning little planet: the top of the photo
+collapses to the pole at the center and the bottom becomes the wraparound
+horizon, with a faint blue atmosphere glow added at the planet's rim.
+- *Planet* — blend between the flat image and the planet projection.
+- *Zoom* — how much of the globe fits on screen (zoom out for a full planet).
+- *Spin* — rotation speed and direction around the pole.
+
+**Photo Cube (Raytraced)** — A real raytraced cube, spinning on two axes, with
+the photo mapped onto every face. Each pixel fires a ray, intersects it with
+the rotating box (slab test), textures the hit face, and shades it with a
+lambert term, a specular glint, and darkened face edges; rays that miss land on
+a dim, slowly drifting copy of the image behind the cube.
+- *Cube* — crossfade between the flat image and the cube scene.
+- *Spin* — tumble speed.
+
+**Terrain Flight (Raymarched)** — Treats the image's luminance as a 3D
+heightfield and flies the camera over it: each pixel raymarches the terrain
+(up to 60 steps), textures the hit point with the photo (which tiles endlessly
+under the flight path), shades it by ray distance, and blends distant hits into
+atmospheric fog; rays that clear the terrain become a hazy sky.
+- *Fly* — blend between the flat image and the flight scene.
+- *Height* — how tall bright areas extrude (also lifts the camera).
+- *Speed* — forward velocity of the flight.
 
 ## Tech notes
 
