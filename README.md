@@ -40,8 +40,10 @@ placeholder sunset image loads by default so you can see the effects immediately
 
 A preset selector sits at the top of the control surface.
 
-- Choose a **built-in** preset (Cinematic, Dreamwave, Kaleido Trip, Vortex,
-  Sculpture 3D, Corrupted, Fishbowl, Ripple Pool) to jump to a curated look.
+- Choose a **built-in** preset to jump to a curated look — Cinematic, Dreamwave,
+  Kaleido Trip, Vortex, Sculpture 3D, Corrupted, Fishbowl, Ripple Pool, and the
+  3D combo presets Crystal Ball, Hyperspace, Liquid Chrome, Wormhole, and
+  Melting Glass.
 - **Save** captures the current knob positions as a named preset, stored in
   `localStorage` so it persists across sessions.
 - **Del** removes one of your saved presets (built-ins can't be deleted).
